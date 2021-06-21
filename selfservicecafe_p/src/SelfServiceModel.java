@@ -1,9 +1,13 @@
 import desmoj.core.simulator.*;
 import desmoj.core.dist.*;
 
+/**
+ * This is the model class. It is the main class of a process-oriented model
+ * of a self service cafeteria with different stations and a dining hall.
+ */
 public class SelfServiceModel extends Model {
 
-    // model parameter: the number of stations with employees (5 station with service -> at least 5 employees)
+    // model parameter: the number of stations with employees
     protected static int NUM_STATIONS = 5;
 
     protected static int employeesPerStation = 2;
@@ -13,7 +17,6 @@ public class SelfServiceModel extends Model {
     protected static int NUM_DININGHALLCAPACITY = 50;
 
     private ContDistUniform customerArrivalTime;
-   // private ContDistExponential customerArrivalTime;
 
     public double getCustomerArrivalTime() {
         return customerArrivalTime.sample();
@@ -63,8 +66,6 @@ public class SelfServiceModel extends Model {
         return restingTimeDessert.sample();
     }
 
-
-
     // queues for customers
     protected ProcessQueue<CustomerProcess> customerSandwichBarQueue;  // 0
     protected ProcessQueue<CustomerProcess> customerMenuBarQueue;      // 1
@@ -72,9 +73,8 @@ public class SelfServiceModel extends Model {
     protected ProcessQueue<CustomerProcess> customerCheckOutQueue;    // 2
     protected ProcessQueue<CustomerProcess> customerDessertBarQueue;  // 3
     protected ProcessQueue<CustomerProcess> customerDessertCheckOutQueue; // 4
-    protected ProcessQueue<CustomerProcess> customerDiningHallSeats;
+    protected ProcessQueue<CustomerProcess> customerDiningHallSeatsQueue;
     protected ProcessQueue<CustomerProcess> customerReservedSeats;
-
 
     // queues for employees
     protected ProcessQueue<EmployeeProcess> idleSandwichBarEmployeesQueue;
@@ -118,7 +118,6 @@ public class SelfServiceModel extends Model {
      * which are necessary to start the simulation.
      */
     public void doInitialSchedules() {
-
         // create and activate the employees
         for (int i=0; i < NUM_STATIONS; i++) {
             for (int j=0; j < employeesPerStation; j++) {
@@ -142,26 +141,23 @@ public class SelfServiceModel extends Model {
         // create and activate the customer generator process
         CustomerGenerator generator = new CustomerGenerator(this, "CustomerArrival", false);
         generator.activate();
-
-
     }
 
     /**
      * Initialises static model components like distributions and queues.
      */
     public void init() {
-
         // service times
 
         // initialise the serviceTimeSandwichBarStream
         // Parameters:
         // this                              = belongs to this model
-        // "ServiceTimeSandwichBarStream"    = the name of the stream
+        // "serviceTimeSandwichBarStream"    = the name of the stream
         // 30.0                              = service takes between 30 and
         // 90.0                              = 90 seconds
         // true                              = show in report?
         // true                              = show in trace?
-        serviceTimeSandwichBar = new ContDistUniform(this, "ServiceTimeSandwichBarStream", 30.0, 90.0, true, true);
+        serviceTimeSandwichBar = new ContDistUniform(this, "serviceTimeSandwichBarStream", 30.0, 90.0, true, true);
 
         // initialise the serviceTimeMenuBarStream
         // Parameters:
@@ -213,6 +209,7 @@ public class SelfServiceModel extends Model {
         // true                               = show in trace?
         serviceTimeDessertCheckOut = new ContDistUniform(this, "serviceTimeDessertCheckOutStream", 15.0, 35.0, true, true);
 
+
         // resting times
 
         // initialise the restingTimeMainDishStream
@@ -241,13 +238,12 @@ public class SelfServiceModel extends Model {
         // initialise the customerArrivalTimeStream
         // Parameters:
         // this                         = belongs to this model
-        // "CustomerArrivalTimeStream"  = the name of the stream
+        // "customerArrivalTimeStream"  = the name of the stream
         // 10.0                         = customers arrive between 10 and
         // 50.0                         = 50 seconds
         // true                         = show in report?
         // true                         = show in trace?
-        customerArrivalTime = new ContDistUniform(this, "CustomerArrivalTimeStream", 10, 50, true, true);
-        //customerArrivalTime = new ContDistExponential(this, "CustomerArrivalTimeStream", 120.0, true, true);
+        customerArrivalTime = new ContDistUniform(this, "customerArrivalTimeStream", 10, 50, true, true);
 
 
         // customer queues
@@ -258,7 +254,7 @@ public class SelfServiceModel extends Model {
         // "SandwichBarQueue"           = the name of the Queue
         // true                         = show in report?
         // true                         = show in trace?
-        customerSandwichBarQueue = new ProcessQueue<CustomerProcess>(this, "SandwichBarQueue", true, true);
+        customerSandwichBarQueue = new ProcessQueue<>(this, "SandwichBarQueue", true, true);
 
         // initialise the customerMenuBarQueue
         // Parameters:
@@ -266,7 +262,7 @@ public class SelfServiceModel extends Model {
         // "MenuBarQueue"               = the name of the Queue
         // true                         = show in report?
         // true                         = show in trace?
-        customerMenuBarQueue = new ProcessQueue<CustomerProcess>(this, "MenuBarQueue", true, true);
+        customerMenuBarQueue = new ProcessQueue<>(this, "MenuBarQueue", true, true);
 
         // initialise the customerDrinksBarQueue
         // Parameters:
@@ -274,7 +270,7 @@ public class SelfServiceModel extends Model {
         // "DrinksBarQueue"             = the name of the Queue
         // true                         = show in report?
         // true                         = show in trace?
-        customerDrinksBarQueue = new ProcessQueue<CustomerProcess>(this, "DrinksBarQueue", true, true);
+        customerDrinksBarQueue = new ProcessQueue<>(this, "DrinksBarQueue", true, true);
 
         // initialise the customerCheckOutQueue
         // Parameters:
@@ -282,7 +278,7 @@ public class SelfServiceModel extends Model {
         // "CheckOutQueue"              = the name of the Queue
         // true                         = show in report?
         // true                         = show in trace?
-        customerCheckOutQueue = new ProcessQueue<CustomerProcess>(this, "CheckOutQueue", true, true);
+        customerCheckOutQueue = new ProcessQueue<>(this, "CheckOutQueue", true, true);
 
         // initialise the customerDessertBarQueue
         // Parameters:
@@ -290,7 +286,7 @@ public class SelfServiceModel extends Model {
         // "DessertBarQueue"              = the name of the Queue
         // true                         = show in report?
         // true                         = show in trace?
-        customerDessertBarQueue = new ProcessQueue<CustomerProcess>(this, "DessertBarQueue", true, true);
+        customerDessertBarQueue = new ProcessQueue<>(this, "DessertBarQueue", true, true);
 
         // initialise the customerDessertCheckOutQueue
         // Parameters:
@@ -298,15 +294,15 @@ public class SelfServiceModel extends Model {
         // "DessertCheckOutQueue"       = the name of the Queue
         // true                         = show in report?
         // true                         = show in trace?
-        customerDessertCheckOutQueue = new ProcessQueue<CustomerProcess>(this, "DessertCheckOutQueue", true, true);
+        customerDessertCheckOutQueue = new ProcessQueue<>(this, "DessertCheckOutQueue", true, true);
 
-        // initialise the customerDiningHallSeats
+        // initialise the customerDiningHallSeatsQueue
         // Parameters:
-        // this                         = belongs to this model
-        // "customerDiningHallSeats"    = the name of the Queue
-        // true                         = show in report?
-        // true                         = show in trace?
-        customerDiningHallSeats = new ProcessQueue<CustomerProcess>(this, "customerDiningHallSeats", true, true);
+        // this                            = belongs to this model
+        // "customerDiningHallSeatsQueue"  = the name of the Queue
+        // true                            = show in report?
+        // true                            = show in trace?
+        customerDiningHallSeatsQueue = new ProcessQueue<>(this, "customerDiningHallSeatsQueue", true, true);
 
         // initialise the customerReservedSeats
         // Parameters:
@@ -314,7 +310,7 @@ public class SelfServiceModel extends Model {
         // "customerReservedSeats"      = the name of the Queue
         // true                         = show in report?
         // true                         = show in trace?
-        customerReservedSeats = new ProcessQueue<CustomerProcess>(this, "customerReservedSeats", true, true);
+        customerReservedSeats = new ProcessQueue<>(this, "customerReservedSeats", true, true);
 
 
         // employees queues
@@ -325,7 +321,7 @@ public class SelfServiceModel extends Model {
         // "idleSandwichBarEmployeesQueue"       = the name of the Queue
         // true                                  = show in report?
         // true                                  = show in trace?
-        idleSandwichBarEmployeesQueue = new ProcessQueue<EmployeeProcess>(this, "idleSandwichBarEmployeesQueue", true, true);
+        idleSandwichBarEmployeesQueue = new ProcessQueue<>(this, "idleSandwichBarEmployeesQueue", true, true);
 
         // initialise the idleMenuBarEmployeesQueue
         // Parameters:
@@ -333,7 +329,7 @@ public class SelfServiceModel extends Model {
         // "idleMenuBarEmployeesQueue"           = the name of the Queue
         // true                                  = show in report?
         // true                                  = show in trace?
-        idleMenuBarEmployeesQueue = new ProcessQueue<EmployeeProcess>(this, "idleMenuBarEmployeesQueue", true, true);
+        idleMenuBarEmployeesQueue = new ProcessQueue<>(this, "idleMenuBarEmployeesQueue", true, true);
 
         // initialise the idleCheckOutEmployeesQueue
         // Parameters:
@@ -341,7 +337,7 @@ public class SelfServiceModel extends Model {
         // "idleCheckOutEmployeesQueue"          = the name of the Queue
         // true                                  = show in report?
         // true                                  = show in trace?
-        idleCheckOutEmployeesQueue = new ProcessQueue<EmployeeProcess>(this, "idleCheckOutEmployeesQueue", true, true);
+        idleCheckOutEmployeesQueue = new ProcessQueue<>(this, "idleCheckOutEmployeesQueue", true, true);
 
         // initialise the idleDessertBarEmployeesQueue
         // Parameters:
@@ -349,7 +345,7 @@ public class SelfServiceModel extends Model {
         // "idleDessertBarEmployeesQueue"        = the name of the Queue
         // true                                  = show in report?
         // true                                  = show in trace?
-        idleDessertBarEmployeesQueue = new ProcessQueue<EmployeeProcess>(this, "idleDessertBarEmployeesQueue", true, true);
+        idleDessertBarEmployeesQueue = new ProcessQueue<>(this, "idleDessertBarEmployeesQueue", true, true);
 
         // initialise the idleDessertCheckOutEmployeesQueue
         // Parameters:
@@ -357,7 +353,7 @@ public class SelfServiceModel extends Model {
         // "idleDessertCheckOutEmployeesQueue"   = the name of the Queue
         // true                                  = show in report?
         // true                                  = show in trace?
-        idleDessertCheckOutEmployeesQueue = new ProcessQueue<EmployeeProcess>(this, "idleDessertCheckOutEmployeesQueue", true, true);
+        idleDessertCheckOutEmployeesQueue = new ProcessQueue<>(this, "idleDessertCheckOutEmployeesQueue", true, true);
 
         // initialise the idleDrinksBarQueue
         // Parameters:
@@ -365,7 +361,7 @@ public class SelfServiceModel extends Model {
         // "idleDrinksBarQueue"                  = the name of the Queue
         // true                                  = show in report?
         // true                                  = show in trace?
-        idleDrinksBarQueue = new ProcessQueue<DrinksBarProcess>(this, "idleDrinksBarQueue", true, true);
+        idleDrinksBarQueue = new ProcessQueue<>(this, "idleDrinksBarQueue", true, true);
 
         // initialise the idleDiningHallSeatsQueue
         // Parameters:
@@ -373,7 +369,7 @@ public class SelfServiceModel extends Model {
         // "idleDiningHallSeatsQueue"            = the name of the Queue
         // true                                  = show in report?
         // true                                  = show in trace?
-        idleDiningHallSeatsQueue = new ProcessQueue<DiningHallProcess>(this, "idleDiningHallSeatsQueue", true, true);
+        idleDiningHallSeatsQueue = new ProcessQueue<>(this, "idleDiningHallSeatsQueue", true, true);
     }
 
     /**
@@ -387,11 +383,15 @@ public class SelfServiceModel extends Model {
 
         Experiment exp = new Experiment("SelfServiceExperiment");
 
+        // connect model and experiment
         model.connectToExperiment(exp);
+
+        // set experiment parameters
         exp.setShowProgressBar(true);
-        exp.tracePeriod(new TimeInstant(0.0), new TimeInstant(120));
+        exp.tracePeriod(new TimeInstant(0.0), new TimeInstant(60));
         exp.debugPeriod(new TimeInstant(0.0), new TimeInstant(60));
 
+        // set end of simulation at 4 hours (14400 seconds)
         exp.stop(new TimeInstant(14400));
 
         exp.start();

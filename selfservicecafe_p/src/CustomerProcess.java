@@ -6,16 +6,14 @@ import co.paralleluniverse.fibers.SuspendExecution;
  */
 public class CustomerProcess extends SimProcess{
 
-
-
+    // a reference to the model this process is part of
     private SelfServiceModel myModel;
-
 
     /**
      * Constructor of the customer process
-     * @param owner
-     * @param name
-     * @param showInTrace
+     * @param owner         the model this process belongs to
+     * @param name          this customer's name
+     * @param showInTrace   flag to indicate if this process shall produce output for the trace
      */
     public CustomerProcess(Model owner, String name, boolean showInTrace) {
         super(owner, name, showInTrace);
@@ -23,24 +21,21 @@ public class CustomerProcess extends SimProcess{
         myModel = (SelfServiceModel) owner;
     }
 
-
     /**
      * Describes the customer's life cycle:
      *
      * On arrival 40% of the customer will enter the queue for the sandwich bar.
      * The rest will enter the queue for the menu bar.
-     * to be continued...
+     * After that 90% will go to the full self-service drinks bar.
+     * The payment process happens at one joint check-out. After paying the costumer looks for a seat
+     * and eats their meal. After the main dish 10% of the costumers get a dessert.
      * @throws SuspendExecution
      */
     @Override
     public void lifeCycle() throws SuspendExecution {
-
         double random = Math.random();
-        //boolean sandwichBar = false;
-        //boolean menuBar = false;
 
         if (random < 0.4) {
-            //sandwichBar = true;
             myModel.customerSandwichBarQueue.insert(this);
             sendTraceNote("SandwichBarQueueLength: " + myModel.customerSandwichBarQueue.length());
 
@@ -52,7 +47,6 @@ public class CustomerProcess extends SimProcess{
             }
         }
         else {
-            //menuBar = true;
             myModel.customerMenuBarQueue.insert(this);
             sendTraceNote("MenuBarQueueLength: " + myModel.customerMenuBarQueue.length());
 
@@ -61,7 +55,6 @@ public class CustomerProcess extends SimProcess{
                 myModel.idleMenuBarEmployeesQueue.remove(employee);
 
                 employee.activateAfter(this);
-
             }
         }
         passivate();
@@ -79,7 +72,6 @@ public class CustomerProcess extends SimProcess{
                 myModel.idleDrinksBarQueue.remove(drinksBar);
 
                 drinksBar.activateAfter(this);
-
             }
             passivate();
 
@@ -101,27 +93,23 @@ public class CustomerProcess extends SimProcess{
         // customer is done at check out
 
         // now: eating at dining hall
-        myModel.customerDiningHallSeats.insert(this);
-        sendTraceNote("DiningHallQueue: " + myModel.customerDiningHallSeats.length());
+        myModel.customerDiningHallSeatsQueue.insert(this);
+        sendTraceNote("DiningHallQueue: " + myModel.customerDiningHallSeatsQueue.length());
 
         if (!myModel.idleDiningHallSeatsQueue.isEmpty()) {
             DiningHallProcess diningHall = myModel.idleDiningHallSeatsQueue.first();
             myModel.idleDiningHallSeatsQueue.remove(diningHall);
 
-            //diningHall.setMainDish(true);
             diningHall.activateAfter(this);
-
         }
         passivate();
 
         // customer is done with the main dish
-        // 10% get a dessert --> they don't need a new seat because they already have one ??
+        // 10% get a dessert
 
         random = Math.random();
 
         if (random < 0.1) {
-
-            myModel.customerReservedSeats.insert(this);
             myModel.customerDessertBarQueue.insert(this);
             sendTraceNote("DessertBarQueue: " + myModel.customerDessertBarQueue.length());
 
@@ -150,26 +138,22 @@ public class CustomerProcess extends SimProcess{
             }
 
             // done with paying
-            // now: get back to the seat
+            // now: get back to the dining hall, look for a new seat
 
-            myModel.customerDiningHallSeats.insert(this);
+            myModel.customerDiningHallSeatsQueue.insert(this);
             sendTraceNote("DrinksBarQueueLength: " + myModel.customerDrinksBarQueue.length());
 
             if (!myModel.idleDiningHallSeatsQueue.isEmpty()) {
                 DiningHallProcess diningHall = myModel.idleDiningHallSeatsQueue.first();
-                myModel.idleDrinksBarQueue.remove(diningHall);
+                myModel.idleDiningHallSeatsQueue.remove(diningHall);
 
-                //diningHall.setMainDish(false);
+                diningHall.setMainDish(false);
                 diningHall.activateAfter(this);
-
-
             }
             passivate();
 
         }
 
         sendTraceNote("Customer was served");
-
-
     }
 }

@@ -1,8 +1,15 @@
 import desmoj.core.simulator.*;
 import co.paralleluniverse.fibers.SuspendExecution;
 
+/**
+ * This class represents the employee on the SelfServiceModel model.
+ * Every employee is assigned to a specific station.
+ * The Employee waits in the corresponding queue until a costumer requests
+ * their service.
+ */
 public class EmployeeProcess extends SimProcess {
 
+    // a reference to the model this process is part of
     private SelfServiceModel myModel;
 
     // stationIndex:
@@ -13,6 +20,13 @@ public class EmployeeProcess extends SimProcess {
     //      Index 4 = dessert check out
     private int stationIndex;
 
+    /**
+     * Constructor of the EmployeeProcess
+     * @param owner         the model this process belongs to
+     * @param name          this employee's name
+     * @param showInTrace   flag to indicate if this process shall produce output for the trace
+     * @param stationIndex  this employee's station
+     */
     public EmployeeProcess(Model owner, String name, boolean showInTrace, int stationIndex) {
         super(owner, name, showInTrace);
 
@@ -20,22 +34,26 @@ public class EmployeeProcess extends SimProcess {
         this.stationIndex = stationIndex;
     }
 
+    /**
+     * Describes the employee's life cycle.
+     * It will first check which station the employee belongs to.
+     * If there is a costumer waiting, the employee
+     *      1) removes the customer from the corresponding queue
+     *      2) serves the costumer
+     *      3) reactivates the costumer
+     * if no costumer is waiting at the employee's station, the employee
+     *      1) inserts themselves into the station's idleEmployees queue and
+     *      2) waits until someone arrives
+     * @throws SuspendExecution
+     */
     @Override
     public void lifeCycle() throws SuspendExecution {
-
-        //überlegung: die mitarbeiter sind fix einer station zugeteilt, also wenn bei der sandwich bar keiner ansteht, kommt der mitarbeiter der sandwich bar in die idleQueue
-        //              selbst, wenn bei der kasse viele Leute anstehen
-        //    -> mitarbeiter kommt erst aus der idleQueue wenn jemand bei seiner Station ansteht
-
         while (true) {
-
-            if (stationIndex == 0) {// && !myModel.customerSandwichBarQueue.isEmpty()) {
+            if (stationIndex == 0) {
                 if (myModel.customerSandwichBarQueue.isEmpty()) {
-
                     myModel.idleSandwichBarEmployeesQueue.insert(this);
 
                     passivate();
-
                 } else {
                     CustomerProcess customer = myModel.customerSandwichBarQueue.first();
                     myModel.customerSandwichBarQueue.remove(customer);
@@ -45,7 +63,7 @@ public class EmployeeProcess extends SimProcess {
                     // reactivate customer
                     customer.activate(new TimeSpan(0.0));
                 }
-            } else if (stationIndex == 1) {//&& !myModel.customerMenuBarQueue.isEmpty()) {
+            } else if (stationIndex == 1) {
                 if (myModel.customerMenuBarQueue.isEmpty()){
                     myModel.idleMenuBarEmployeesQueue.insert(this);
 
@@ -59,7 +77,7 @@ public class EmployeeProcess extends SimProcess {
                     // reactivate customer
                     customer.activate(new TimeSpan(0.0));
                 }
-            } else if (stationIndex == 2){// && !myModel.customerCheckOutQueue.isEmpty()) {
+            } else if (stationIndex == 2){
                 if (myModel.customerCheckOutQueue.isEmpty()) {
                     myModel.idleCheckOutEmployeesQueue.insert(this);
 
@@ -73,7 +91,7 @@ public class EmployeeProcess extends SimProcess {
                     // reactivate customer
                     customer.activate(new TimeSpan(0.0));
                 }
-            } else if (stationIndex == 3) {// && !myModel.customerDessertBarQueue.isEmpty()) {
+            } else if (stationIndex == 3) {
                 if (myModel.customerDessertBarQueue.isEmpty()) {
                     myModel.idleDessertBarEmployeesQueue.insert(this);
                     passivate();
@@ -86,7 +104,7 @@ public class EmployeeProcess extends SimProcess {
                     // reactivate customer
                     customer.activate(new TimeSpan(0.0));
                 }
-            } else if (stationIndex == 4) {// && !myModel.customerDessertCheckOutQueue.isEmpty()) {
+            } else if (stationIndex == 4) {
                 if (myModel.customerDessertCheckOutQueue.isEmpty()) {
                     myModel.idleDessertCheckOutEmployeesQueue.insert(this);
                     passivate();
