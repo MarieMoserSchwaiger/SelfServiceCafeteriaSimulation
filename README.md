@@ -1,1 +1,3 @@
-# SelfServiceCafeteriaSimulation
+# Self-Service Cafeteria Simulation
+This project represents a process-oriented simulation model of a self-service cafeteria wirth DESMO-J. 
+The cafeteria consists of 5 stations with employees. A sandwichbar, a menubar, a checkout, a dessertbar and a dessertbar-checkout. The cafeteria also has self-service drinking machine(s) and a dining hall. On arrival 40% of the customer will enter the queue for the sandwichbar. The rest will enter the queue for the menubar. After that 90% will go to the full self-service drinks bar. The payment process happens at one joint check-out. After paying the costumer looks for a seat and eats their meal. After the main dish 10% of the costumers get a dessert. After paying for the dessert at the dessertbar-checkout, the costumer looks for a new seat in the dining hall.
